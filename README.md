@@ -2,7 +2,8 @@
 
 My Brainfuck implementation (currently written in C#).
 
-TODO: Rewrite the project in C or Rust.
+TODO: Rewrite the project in C or Rust to simplify the project. C# is kinda
+bloated.
 
 ## Supported Architectures
 
@@ -21,10 +22,12 @@ TODO: Rewrite the project in C or Rust.
 
 ## Quick Start
 
-1. Build the solution and copy executables (and their dependencies: `dll`s,
+1. Choose (hardcode) your architecture.
+
+2. Build the solution and copy executables (and their dependencies: `dll`s,
    `deps.json`s, `runtimeconfig.json`s (_bruh_)) into the root of the project.
 
-2. Create "Hello, world!" source.
+3. Create "Hello, world!" source.
 
    ```console
    $ echo >> hello-world.bf "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++"
@@ -32,7 +35,7 @@ TODO: Rewrite the project in C or Rust.
    $ echo >> hello-world.bf "------.--------.>+.>."
    ```
 
-3. Interpret or compile the source.
+4. Interpret or compile the source.
 
    -
      ```console
