@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Brainfuck.Compiler
@@ -40,7 +41,7 @@ namespace Brainfuck.Compiler
 
         private static void Compile(string executablePath, Program program)
         {
-            IAssemblyGenerator generator = new WindowsX64Generator();
+            IAssemblyGenerator generator = new Win32Generator();
             var output = new StreamWriter($"{executablePath}.asm");
             generator.GenerateAssembly(program, memoryCapacity: 30000, output);
             output.Close();
@@ -48,15 +49,21 @@ namespace Brainfuck.Compiler
             #if NASM
             // Depends on NASM:
             // https://www.nasm.us/
-            IAssembler assembler = new WindowsNetwideAssembler();
+            IAssembler assembler = new Nasm(objectFormat: "win32");
             assembler.Assemble($"{executablePath}.asm", $"{executablePath}.obj");
             #endif
 
             #if GO_LINK
             // Depends on GoLink:
             // http://www.godevtool.com/#linker
-            ILinker linker = new WindowsGoLinker();
+            ILinker linker = new GoLink(
+                entryPoint: "mainCRTStartup",
+                dependencies: new string[] { "kernel32.dll" });
             linker.Link($"{executablePath}.obj", $"{executablePath}.exe");
+            #endif
+
+            #if RUN
+            Process.Start($"\"{executablePath}\"");
             #endif
         }
 

@@ -4,13 +4,13 @@ using System.IO;
 namespace Brainfuck.Compiler
 {
     // Used registers:
-    // - R12 - standart input;
-    // - R13 - standart output;
-    // - R14 - memory pointer.
+    // - ESI - standart input;
+    // - EDI - standart output;
+    // - EBX - memory pointer.
     //
     // References:
-    // - Windows X64 calling convention:
-    //   https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-160
+    // - Windows X32 calling convention:
+    //   https://en.wikipedia.org/wiki/X86_calling_conventions#stdcall
     // - CloseHandle:
     //   https://docs.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle
     // - ExitProcess:
@@ -21,7 +21,7 @@ namespace Brainfuck.Compiler
     //   https://docs.microsoft.com/en-us/windows/console/readconsole
     // - WriteConsole:
     //   https://docs.microsoft.com/en-us/windows/console/writeconsole
-    public sealed class WindowsX64Generator : IAssemblyGenerator
+    public sealed class Win32Generator : IAssemblyGenerator
     {
         public void GenerateAssembly(Program program, int memoryCapacity, StreamWriter output)
         {
@@ -43,17 +43,17 @@ namespace Brainfuck.Compiler
             output.WriteLine("mainCRTStartup:");
             output.WriteLine();
 
-            output.WriteLine("    mov ecx, -10");
+            output.WriteLine("    push dword -10");
             output.WriteLine("    call GetStdHandle");
-            output.WriteLine("    mov r12, rax");
+            output.WriteLine("    mov esi, eax");
             output.WriteLine();
 
-            output.WriteLine("    mov ecx, -11");
+            output.WriteLine("    push dword -11");
             output.WriteLine("    call GetStdHandle");
-            output.WriteLine("    mov r13, rax");
+            output.WriteLine("    mov edi, eax");
             output.WriteLine();
 
-            output.WriteLine("    xor r14, r14");
+            output.WriteLine("    xor ebx, ebx");
             output.WriteLine();
 
             for (var i = 0; i < program.Instructions.Count; i++)
@@ -63,48 +63,50 @@ namespace Brainfuck.Compiler
                 switch (program.Instructions[i])
                 {
                     case '>':
-                        output.WriteLine("    inc r14");
+                        output.WriteLine("    inc ebx");
                         break;
 
                     case '<':
-                        output.WriteLine("    dec r14");
+                        output.WriteLine("    dec ebx");
                         break;
 
                     case '+':
-                        output.WriteLine("    inc byte [r14 + memory]");
+                        output.WriteLine("    inc byte [ebx + memory]");
                         break;
 
                     case '-':
-                        output.WriteLine("    dec byte [r14 + memory]");
+                        output.WriteLine("    dec byte [ebx + memory]");
                         break;
 
                     case '.':
-                        output.WriteLine("    mov rcx, r13");
-                        output.WriteLine("    lea rdx, [r14 + memory]");
-                        output.WriteLine("    mov r8d, 1");
-                        output.WriteLine("    mov r9, temporary");
-                        output.WriteLine("    push qword 0");
+                        output.WriteLine("    push dword 0");
+                        output.WriteLine("    push temporary");
+                        output.WriteLine("    push dword 1");
+                        output.WriteLine("    lea eax, [ebx + memory]");
+                        output.WriteLine("    push eax");
+                        output.WriteLine("    push edi");
                         output.WriteLine("    call WriteConsoleA");
                         break;
 
                     case ',':
-                        output.WriteLine("    mov rcx, r12");
-                        output.WriteLine("    lea rdx, [r14 + memory]");
-                        output.WriteLine("    mov r8d, 1");
-                        output.WriteLine("    mov r9, temporary");
-                        output.WriteLine("    push qword 0");
+                        output.WriteLine("    push dword 0");
+                        output.WriteLine("    push temporary");
+                        output.WriteLine("    push dword 1");
+                        output.WriteLine("    lea eax, [ebx + memory]");
+                        output.WriteLine("    push eax");
+                        output.WriteLine("    push edi");
                         output.WriteLine("    call ReadConsoleA");
                         break;
 
                     case '[':
                         int closeBracket = program.OpenCloseBracketPairs[i];
-                        output.WriteLine("    cmp byte [r14 + memory], 0");
+                        output.WriteLine("    cmp byte [ebx + memory], 0");
                         output.WriteLine("    jz .L{0}", (closeBracket + 1).ToString(localLabelFormat));
                         break;
 
                     case ']':
                         int openBracket = program.CloseOpenBracketPairs[i];
-                        output.WriteLine("    cmp byte [r14 + memory], 0");
+                        output.WriteLine("    cmp byte [ebx + memory], 0");
                         output.WriteLine("    jnz .L{0}", openBracket.ToString(localLabelFormat));
                         break;
                 }
@@ -112,15 +114,15 @@ namespace Brainfuck.Compiler
                 output.WriteLine();
             }
 
-            output.WriteLine("    mov rcx, r12");
+            output.WriteLine("    push esi");
             output.WriteLine("    call CloseHandle");
             output.WriteLine();
 
-            output.WriteLine("    mov rcx, r13");
+            output.WriteLine("    push edi");
             output.WriteLine("    call CloseHandle");
             output.WriteLine();
 
-            output.WriteLine("    xor ecx, ecx");
+            output.WriteLine("    push dword 0");
             output.WriteLine("    call ExitProcess");
             output.WriteLine();
 

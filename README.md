@@ -4,6 +4,14 @@ My Brainfuck implementation (currently written in C#).
 
 TODO: Rewrite the project in C or Rust.
 
+## Supported Architectures
+
+- [x] Windows X64;
+- [x] Windows X32;
+- [ ] Linux X64;
+- [ ] Linux X32;
+- [ ] ARM.
+
 ## Dependencies
 
 - .NET 5 (can be downgraded);

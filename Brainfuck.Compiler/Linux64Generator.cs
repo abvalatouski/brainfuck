@@ -11,7 +11,7 @@ namespace Brainfuck.Compiler
     // References:
     // - Linux X64 system calls:
     //   https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/
-    public sealed class LinuxX64Generator : IAssemblyGenerator
+    public sealed class Linux64Generator : IAssemblyGenerator
     {
         public void GenerateAssembly(Program program, int memoryCapacity, StreamWriter output)
         {
