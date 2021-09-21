@@ -13,7 +13,8 @@ TODO: Rewrite the project in C or Rust.
 
 ## Quick Start
 
-1. Build the solution and copy executables into the root of the project.
+1. Build the solution and copy executables (and their dependencies: `dll`s,
+   `deps.json`s, `runtimeconfig.json`s (_bruh_)) into the root of the project.
 
 2. Create "Hello, world!" source.
 
